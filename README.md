@@ -124,7 +124,7 @@ $ scp ipconf mininet@[guest address]:/home/mininet
 
 3. Then start the network:
 ```
-$ sudo mn --custom mininet/custom/topo-4sw-4host.py --topo=rftest2 --controller=remote,ip=[host address],port=6633 --pre=ipconf
+$ sudo mn -x --switch ovsk,datapath=user --custom mininet/custom/topo-4sw-4host.py --topo=rftest2 --controller=remote,ip=[host address],port=6633 --pre=ipconf
 ```
 
 Wait for the network to converge (it should take a few seconds), and try to ping:
@@ -133,6 +133,48 @@ mininet> pingall
 ...
 mininet> h2 ping h3
 ```
+For more details on this test, see its [tutorial](https://github.com/routeflow/RouteFlow/wiki/Tutorial-2:-rftest2).
+
+### rftest3
+This test converts ip routers to mpls lsrs and lers using ldp.
+This test should be run with a [Mininet](http://mininet.org/) simulated network.
+In the steps below, replace [guest address] with the IP address you use to access your Mininet VM.
+The same applies to [host address], that should be the address to access the host from inside the VM.
+
+1. Run:
+```
+$ sudo ./rftest3
+```
+
+2. Once you have a Mininet VM up and running, copy the network topology files in rftest to the VM:
+```
+$ scp topo-4sw-4host.py mininet@[guest address]:/home/mininet/mininet/custom
+$ scp ipconf mininet@[guest address]:/home/mininet
+```
+
+3. Then start the network:
+```
+$ sudo mn -x --switch ovsk,datapath=user --custom mininet/custom/topo-4sw-4host.py --topo=rftest2 --controller=remote,ip=[host address],port=6633 --pre=ipconf
+```
+
+Wait for the network to converge (it should take a few seconds), and try to ping:
+```
+mininet> pingall
+... 
+```
+On xterm of h2
+
+```
+> iperf -s 12345
+```
+
+On xterm of h3
+
+```
+> iperf -c 172.31.2.100 12345 -M 100
+```
+
+USe ovs-ofctl to see packet counters increment for mpls flow entries.
 
 For more details on this test, see its [tutorial](https://github.com/routeflow/RouteFlow/wiki/Tutorial-2:-rftest2).
 
