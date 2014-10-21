@@ -43,7 +43,7 @@ app: lib
 		echo "done."; \
 	done
 
-rfclient: lib
+rfclient:
 	@mkdir -p $(BUILD_OBJ_DIR);
 	@for dir in "rfclient" ; do \
 		mkdir -p $(BUILD_OBJ_DIR)/$$dir; \

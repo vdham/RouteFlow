@@ -78,6 +78,7 @@ typedef struct ftn_msg_t_
    */
   uint8_t table_operation;
 
+
   /*
    * Incoming IP to match on.
    */

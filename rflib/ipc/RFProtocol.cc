@@ -433,17 +433,22 @@ string DataPlaneMap::str() {
 RouteMod::RouteMod() {
     set_mod(0);
     set_id(0);
+    set_table_id(1);
     set_matches(std::vector<Match>());
     set_actions(std::vector<Action>());
     set_options(std::vector<Option>());
+    set_instructions(std::vector<Instruction>());
 }
 
-RouteMod::RouteMod(uint8_t mod, uint64_t id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options) {
+RouteMod::RouteMod(uint8_t mod, uint64_t id, uint8_t table_id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options,
+		std::vector<Instruction> instructions) {
     set_mod(mod);
     set_id(id);
+    set_table_id(table_id);
     set_matches(matches);
     set_actions(actions);
     set_options(options);
+    set_instructions(instructions);
 }
 
 int RouteMod::get_type() {
@@ -452,6 +457,10 @@ int RouteMod::get_type() {
 
 uint8_t RouteMod::get_mod() {
     return this->mod;
+}
+
+uint8_t RouteMod::get_table_id() {
+	return this->table_id;
 }
 
 void RouteMod::set_mod(uint8_t mod) {
@@ -464,6 +473,10 @@ uint64_t RouteMod::get_id() {
 
 void RouteMod::set_id(uint64_t id) {
     this->id = id;
+}
+
+void RouteMod::set_table_id(uint8_t table_id) {
+	this->table_id = table_id;
 }
 
 std::vector<Match> RouteMod::get_matches() {
@@ -502,22 +515,38 @@ void RouteMod::add_option(const Option& option) {
     this->options.push_back(option);
 }
 
+std::vector<Instruction> RouteMod::get_instructions() {
+    return this->instructions;
+}
+
+void RouteMod::set_instructions(std::vector<Instruction> instructions) {
+    this->instructions = instructions;
+}
+
+void RouteMod::add_instruction(const Instruction& instruction) {
+    this->instructions.push_back(instruction);
+}
+
 void RouteMod::from_BSON(const char* data) {
     mongo::BSONObj obj(data);
     set_mod(string_to<uint8_t>(obj["mod"].String()));
     set_id(string_to<uint64_t>(obj["id"].String()));
+    set_table_id(string_to<uint8_t>(obj["table_id"].String()));
     set_matches(MatchList::to_vector(obj["matches"].Array()));
     set_actions(ActionList::to_vector(obj["actions"].Array()));
     set_options(OptionList::to_vector(obj["options"].Array()));
+    //add_instruction(InstructionList::to_vector(obj["instructions"].Array()));
 }
 
 const char* RouteMod::to_BSON() {
     mongo::BSONObjBuilder _b;
     _b.append("mod", to_string<uint16_t>(get_mod()));
     _b.append("id", to_string<uint64_t>(get_id()));
+    _b.append("table_id", to_string<uint16_t>(get_table_id()));
     _b.appendArray("matches", MatchList::to_BSON(get_matches()));
     _b.appendArray("actions", ActionList::to_BSON(get_actions()));
     _b.appendArray("options", OptionList::to_BSON(get_options()));
+    _b.appendArray("instructions", InstructionList::to_BSON(get_instructions()));
     mongo::BSONObj o = _b.obj();
     char* data = new char[o.objsize()];
     memcpy(data, o.objdata(), o.objsize());
@@ -532,5 +561,284 @@ string RouteMod::str() {
     ss << "  matches: " << MatchList::to_BSON(get_matches()) << endl;
     ss << "  actions: " << ActionList::to_BSON(get_actions()) << endl;
     ss << "  options: " << OptionList::to_BSON(get_options()) << endl;
+    ss << "  instructions: " << InstructionList::to_BSON(get_instructions()) << endl;
     return ss.str();
 }
+
+NhlfeMod::NhlfeMod() {
+    set_mod(0);
+    set_id(0);
+    //vdham set_table_id(0);
+    set_matches(std::vector<Match>());
+    set_actions(std::vector<Action>());
+    set_options(std::vector<Option>());
+    set_instructions(std::vector<Instruction>());
+}
+
+NhlfeMod::NhlfeMod(uint8_t mod, uint64_t id, uint8_t table_id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options,
+		std::vector<Instruction> instructions) {
+    set_mod(mod);
+    set_id(id);
+    set_table_id(table_id);
+    set_matches(matches);
+    set_actions(actions);
+    set_options(options);
+    set_instructions(instructions);
+}
+
+int NhlfeMod::get_type() {
+    return NHLFE_MOD;
+}
+
+uint8_t NhlfeMod::get_mod() {
+    return this->mod;
+}
+
+uint8_t NhlfeMod::get_table_id() {
+	return this->table_id;
+}
+
+void NhlfeMod::set_mod(uint8_t mod) {
+    this->mod = mod;
+}
+
+uint64_t NhlfeMod::get_id() {
+    return this->id;
+}
+
+void NhlfeMod::set_id(uint64_t id) {
+    this->id = id;
+}
+
+void NhlfeMod::set_table_id(uint8_t table_id) {
+	this->table_id = table_id;
+}
+
+std::vector<Match> NhlfeMod::get_matches() {
+    return this->matches;
+}
+
+void NhlfeMod::set_matches(std::vector<Match> matches) {
+    this->matches = matches;
+}
+
+void NhlfeMod::add_match(const Match& match) {
+    this->matches.push_back(match);
+}
+
+std::vector<Action> NhlfeMod::get_actions() {
+    return this->actions;
+}
+
+void NhlfeMod::set_actions(std::vector<Action> actions) {
+    this->actions = actions;
+}
+
+void NhlfeMod::add_action(const Action& action) {
+    this->actions.push_back(action);
+}
+
+std::vector<Option> NhlfeMod::get_options() {
+    return this->options;
+}
+
+void NhlfeMod::set_options(std::vector<Option> options) {
+    this->options = options;
+}
+
+void NhlfeMod::add_option(const Option& option) {
+    this->options.push_back(option);
+}
+
+std::vector<Instruction> NhlfeMod::get_instructions() {
+    return this->instructions;
+}
+
+void NhlfeMod::set_instructions(std::vector<Instruction> instructions) {
+    this->instructions = instructions;
+}
+
+void NhlfeMod::add_instruction(const Instruction& instruction) {
+    this->instructions.push_back(instruction);
+}
+
+
+void NhlfeMod::from_BSON(const char* data) {
+    mongo::BSONObj obj(data);
+    set_mod(string_to<uint8_t>(obj["mod"].String()));
+    set_id(string_to<uint64_t>(obj["id"].String()));
+    set_table_id(string_to<uint8_t>(obj["table_id"].String()));
+    set_matches(MatchList::to_vector(obj["matches"].Array()));
+    set_actions(ActionList::to_vector(obj["actions"].Array()));
+    set_options(OptionList::to_vector(obj["options"].Array()));
+    set_instructions(InstructionList::to_vector(obj["instructions"].Array()));
+
+}
+
+const char* NhlfeMod::to_BSON() {
+    mongo::BSONObjBuilder _b;
+    _b.append("mod", to_string<uint16_t>(get_mod()));
+    _b.append("id", to_string<uint64_t>(get_id()));
+    _b.append("table_id", to_string<uint16_t>(get_table_id()));
+    _b.appendArray("matches", MatchList::to_BSON(get_matches()));
+    _b.appendArray("actions", ActionList::to_BSON(get_actions()));
+    _b.appendArray("options", OptionList::to_BSON(get_options()));
+    _b.appendArray("instructions", InstructionList::to_BSON(get_instructions()));
+    mongo::BSONObj o = _b.obj();
+    char* data = new char[o.objsize()];
+    memcpy(data, o.objdata(), o.objsize());
+    return data;
+}
+
+string NhlfeMod::str() {
+    stringstream ss;
+    ss << "NhlfeMod" << endl;
+    ss << "  mod: " << to_string<uint16_t>(get_mod()) << endl;
+    ss << "  id: " << to_string<uint64_t>(get_id()) << endl;
+    ss << "  matches: " << MatchList::to_BSON(get_matches()) << endl;
+    ss << "  actions: " << ActionList::to_BSON(get_actions()) << endl;
+    ss << "  options: " << OptionList::to_BSON(get_options()) << endl;
+    ss << "  instructions: " << InstructionList::to_BSON(get_instructions()) << endl;
+
+    return ss.str();
+}
+
+FtnMod::FtnMod() {
+    set_mod(0);
+    set_id(0);
+    //vdham set_table_id(1);
+    set_matches(std::vector<Match>());
+    set_actions(std::vector<Action>());
+    set_options(std::vector<Option>());
+    set_instructions(std::vector<Instruction>());
+}
+
+FtnMod::FtnMod(uint8_t mod, uint64_t id, uint8_t table_id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options,
+	std::vector<Instruction> instructions) {
+    set_mod(mod);
+    set_id(id);
+    set_table_id(table_id);
+    set_matches(matches);
+    set_actions(actions);
+    set_options(options);
+    set_instructions(instructions);
+}
+
+int FtnMod::get_type() {
+    return FTN_MOD;
+}
+
+uint8_t FtnMod::get_mod() {
+    return this->mod;
+}
+
+uint8_t FtnMod::get_table_id() {
+	return this->table_id;
+}
+
+void FtnMod::set_mod(uint8_t mod) {
+    this->mod = mod;
+}
+
+uint64_t FtnMod::get_id() {
+    return this->id;
+}
+
+void FtnMod::set_id(uint64_t id) {
+    this->id = id;
+}
+
+void FtnMod::set_table_id(uint8_t table_id) {
+	this->table_id = table_id;
+}
+
+std::vector<Match> FtnMod::get_matches() {
+    return this->matches;
+}
+
+void FtnMod::set_matches(std::vector<Match> matches) {
+    this->matches = matches;
+}
+
+void FtnMod::add_match(const Match& match) {
+    this->matches.push_back(match);
+}
+
+std::vector<Action> FtnMod::get_actions() {
+    return this->actions;
+}
+
+void FtnMod::set_actions(std::vector<Action> actions) {
+    this->actions = actions;
+}
+
+void FtnMod::add_action(const Action& action) {
+    this->actions.push_back(action);
+}
+
+std::vector<Option> FtnMod::get_options() {
+    return this->options;
+}
+
+void FtnMod::set_options(std::vector<Option> options) {
+    this->options = options;
+}
+
+void FtnMod::add_option(const Option& option) {
+    this->options.push_back(option);
+}
+
+std::vector<Instruction> FtnMod::get_instructions() {
+    return this->instructions;
+}
+
+void FtnMod::set_instructions(std::vector<Instruction> instructions) {
+    this->instructions = instructions;
+}
+
+void FtnMod::add_instruction(const Instruction& instruction) {
+    this->instructions.push_back(instruction);
+}
+
+
+void FtnMod::from_BSON(const char* data) {
+    mongo::BSONObj obj(data);
+    set_mod(string_to<uint8_t>(obj["mod"].String()));
+    set_id(string_to<uint64_t>(obj["id"].String()));
+    set_table_id(string_to<uint8_t>(obj["table_id"].String()));
+    set_matches(MatchList::to_vector(obj["matches"].Array()));
+    set_actions(ActionList::to_vector(obj["actions"].Array()));
+    set_options(OptionList::to_vector(obj["options"].Array()));
+    set_instructions(InstructionList::to_vector(obj["instructions"].Array()));
+}
+
+const char* FtnMod::to_BSON() {
+    mongo::BSONObjBuilder _b;
+    _b.append("mod", to_string<uint16_t>(get_mod()));
+    _b.append("id", to_string<uint64_t>(get_id()));
+    _b.append("table_id", to_string<uint16_t>(get_table_id()));
+    _b.appendArray("matches", MatchList::to_BSON(get_matches()));
+    _b.appendArray("actions", ActionList::to_BSON(get_actions()));
+    _b.appendArray("options", OptionList::to_BSON(get_options()));
+    _b.appendArray("instructions", InstructionList::to_BSON(get_instructions()));
+    mongo::BSONObj o = _b.obj();
+    char* data = new char[o.objsize()];
+    memcpy(data, o.objdata(), o.objsize());
+    return data;
+}
+
+string FtnMod::str() {
+    stringstream ss;
+    ss << "FtnMod" << endl;
+    ss << "  mod: " << to_string<uint16_t>(get_mod()) << endl;
+    ss << "  id: " << to_string<uint64_t>(get_id()) << endl;
+    ss << "  table_id: " << to_string<uint16_t>(get_table_id()) << endl;
+    ss << "  matches: " << MatchList::to_BSON(get_matches()) << endl;
+    ss << "  actions: " << ActionList::to_BSON(get_actions()) << endl;
+    ss << "  options: " << OptionList::to_BSON(get_options()) << endl;
+    ss << "  instructions: " << InstructionList::to_BSON(get_instructions()) << endl;
+    return ss.str();
+}
+
+
+

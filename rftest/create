@@ -17,10 +17,27 @@ chroot $LXCDIR/base/rootfs apt-get update
 # !!!
 # ADD THE PACKETS YOU NEED TO INSTALL HERE
 # !!!
-chroot $LXCDIR/base/rootfs apt-get -y --force-yes install quagga libboost-thread-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev rsyslog vlan tcpdump
-# !!!
+chroot $LXCDIR/base/rootfs apt-get -y --force-yes install libboost-thread-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev rsyslog vlan tcpdump quagga
+apt-get install git-core autoconf libtool gawk xterm texinfo libreadline6 libreadline6-dev gcc
+mkdir /home/kamboi
+mkdir /home/kamboi/tmp
+git clone https://github.com/vdham/quagga-public-kamboi.git
+cd quagga-public-kamboi
+git checkout mpls_pre_launch
+./bootstrap.sh
+./configure --enable-mpls=null --sysconfdir=/etc/quagga --localstatedir=/var/run/quagga --prefix=/home/kamboi/tmp --enable-fpm --enable-vtysh
+make
+make install
+mkdir /var/lib/lxc/base/rootfs/usr/include/quagga
+mkdir /var/lib/lxc/base/rootfs/usr/lib/quagga
+cp -pr /home/kamboi/tmp/include/quagga/* /var/lib/lxc/base/rootfs/usr/include/quagga/.
+cp -pr /home/kamboi/tmp/sbin/* /var/lib/lxc/base/rootfs/usr/lib/quagga/.
+cp -pr /home/kamboi/tmp/lib/* /var/lib/lxc/base/rootfs/usr/lib/.
+cp -pr /home/kamboi/tmp/bin/vtysh /var/lib/lxc/base/rootfs/usr/bin/.
 
+# !!!
 # Clone the base container to make other containers based on config
+cd ./..
 cd $CONFIG
 for VM in *
 do

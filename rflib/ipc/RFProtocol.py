@@ -4,6 +4,7 @@ import pymongo as mongo
 from rflib.types.Match import Match
 from rflib.types.Action import Action
 from rflib.types.Option import Option
+from rflib.types.Instruction import Instruction 
 from MongoIPC import MongoIPCMessage
 
 format_id = lambda dp_id: hex(dp_id).rstrip('L')
@@ -15,6 +16,8 @@ DATAPATH_DOWN = 3
 VIRTUAL_PLANE_MAP = 4
 DATA_PLANE_MAP = 5
 ROUTE_MOD = 6
+NHLFE_MOD = 7
+FTN_MOD = 8
 
 class PortRegister(MongoIPCMessage):
     def __init__(self, vm_id=None, vm_port=None, hwaddress=None):
@@ -435,12 +438,15 @@ class DataPlaneMap(MongoIPCMessage):
         return s
 
 class RouteMod(MongoIPCMessage):
-    def __init__(self, mod=None, id=None, matches=None, actions=None, options=None):
+    def __init__(self, mod=None, id=None, table_id=None, matches=None, actions=None, options=None,
+                 instructions=None):
         self.set_mod(mod)
         self.set_id(id)
+        self.set_table_id(table_id)
         self.set_matches(matches)
         self.set_actions(actions)
         self.set_options(options)
+        self.set_instructions(instructions)
 
     def get_type(self):
         return ROUTE_MOD
@@ -464,6 +470,159 @@ class RouteMod(MongoIPCMessage):
             self.id = int(id)
         except:
             self.id = 0
+            
+    def get_table_id(self):
+        return self.table_id
+
+    def set_table_id(self, table_id):
+        table_id = 0 if table_id is None else table_id
+        try:
+            self.table_id = int(table_id)
+        except:
+            self.table_id = 0
+
+    def get_matches(self):
+        return self.matches
+
+    def set_matches(self, matches):
+        matches = list() if matches is None else matches
+        try:
+            self.matches = list(matches)
+        except:
+            self.matches = list()
+
+    def add_match(self, match):
+        self.matches.append(match.to_dict())
+
+    def get_actions(self):
+        return self.actions
+
+    def set_actions(self, actions):
+        actions = list() if actions is None else actions
+        try:
+            self.actions = list(actions)
+        except:
+            self.actions = list()
+
+    def add_action(self, action):
+        self.actions.append(action.to_dict())
+
+    def get_options(self):
+        return self.options
+
+    def set_options(self, options):
+        options = list() if options is None else options
+        try:
+            self.options = list(options)
+        except:
+            self.options = list()
+            
+    def add_option(self, option):
+        self.options.append(option.to_dict())
+
+    def add_instruction(self, instruction):
+        self.instructions.append(instruction.to_dict())
+        
+    def get_instructions(self):
+        return self.instructions
+
+    def set_instructions(self, instructions):
+        instructions = list() if instructions is None else instructions
+        try:
+            self.instructions = list(instructions)
+        except:
+            self.instructions = list()
+
+    def from_dict(self, data):
+        self.set_mod(data["mod"])
+        self.set_id(data["id"])
+        self.set_table_id(data["table_id"])
+        self.set_matches(data["matches"])
+        self.set_actions(data["actions"])
+        self.set_options(data["options"])
+        self.set_instructions(data["instructions"])
+
+    def to_dict(self):
+        data = {}
+        data["mod"] = str(self.get_mod())
+        data["id"] = str(self.get_id())
+        data["table_id"] = str(self.get_table_id())
+        data["matches"] = self.get_matches()
+        data["actions"] = self.get_actions()
+        data["options"] = self.get_options()
+        data["instructions"] = self.get_instructions()
+        
+        return data
+
+    def from_bson(self, data):
+        data = bson.BSON.decode(data)
+        self.from_dict(data)
+
+    def to_bson(self):
+        return bson.BSON.encode(self.get_dict())
+
+    def __str__(self):
+        s = "RouteMod\n"
+        s += "  mod: " + str(self.get_mod()) + "\n"
+        s += "  id: " + format_id(self.get_id()) + "\n"
+        s += "  table_id: " + format_id(self.get_table_id()) + "\n"
+        s += "  matches:\n"
+        for match in self.get_matches():
+            s += "    " + str(Match.from_dict(match)) + "\n"
+        s += "  actions:\n"
+        for action in self.get_actions():
+            s += "    " + str(Action.from_dict(action)) + "\n"
+        s += "  options:\n"
+        for option in self.get_options():
+            s += "    " + str(Option.from_dict(option)) + "\n"
+        s += "  instructions:\n"
+        for option in self.get_options():
+            s += "    " + str(Option.from_dict(option)) + "\n"
+        return s
+    
+class NhlfeMod(MongoIPCMessage):
+    def __init__(self, mod=None, id=None, table_id=None, matches=None, actions=None, options=None,
+                 instructions=None):
+        self.set_mod(mod)
+        self.set_id(id)
+        self.set_table_id(table_id)
+        self.set_matches(matches)
+        self.set_actions(actions)
+        self.set_options(options)
+        self.set_instructions(instructions)
+
+    def get_type(self):
+        return NHLFE_MOD
+
+    def get_mod(self):
+        return self.mod
+
+    def set_mod(self, mod):
+        mod = 0 if mod is None else mod
+        try:
+            self.mod = int(mod)
+        except:
+            self.mod = 0
+
+    def get_id(self):
+        return self.id
+
+    def set_id(self, id):
+        id = 0 if id is None else id
+        try:
+            self.id = int(id)
+        except:
+            self.id = 0
+            
+    def get_table_id(self):
+        return self.table_id
+
+    def set_table_id(self, table_id):
+        table_id = 0 if table_id is None else table_id
+        try:
+            self.table_id = int(table_id)
+        except:
+            self.table_id = 0
 
     def get_matches(self):
         return self.matches
@@ -503,21 +662,38 @@ class RouteMod(MongoIPCMessage):
 
     def add_option(self, option):
         self.options.append(option.to_dict())
+        
+    def add_instruction(self, instruction):
+        self.instructions.append(instruction.to_dict())
+        
+    def get_instructions(self):
+        return self.instructions
+
+    def set_instructions(self, instructions):
+        instructions = list() if instructions is None else instructions
+        try:
+            self.instructions = list(instructions)
+        except:
+            self.instructions = list()
 
     def from_dict(self, data):
         self.set_mod(data["mod"])
         self.set_id(data["id"])
+        self.set_table_id(data["table_id"])
         self.set_matches(data["matches"])
         self.set_actions(data["actions"])
         self.set_options(data["options"])
+        self.set_instructions(data["instructions"])
 
     def to_dict(self):
         data = {}
         data["mod"] = str(self.get_mod())
         data["id"] = str(self.get_id())
+        data["table_id"] = str(self.get_table_id())
         data["matches"] = self.get_matches()
         data["actions"] = self.get_actions()
         data["options"] = self.get_options()
+        data["instructions"] = self.get_instructions()
         return data
 
     def from_bson(self, data):
@@ -528,9 +704,10 @@ class RouteMod(MongoIPCMessage):
         return bson.BSON.encode(self.get_dict())
 
     def __str__(self):
-        s = "RouteMod\n"
+        s = "NhlfeMod\n"
         s += "  mod: " + str(self.get_mod()) + "\n"
         s += "  id: " + format_id(self.get_id()) + "\n"
+        s += "  table_id: " + format_id(self.get_table_id()) + "\n"
         s += "  matches:\n"
         for match in self.get_matches():
             s += "    " + str(Match.from_dict(match)) + "\n"
@@ -540,4 +717,150 @@ class RouteMod(MongoIPCMessage):
         s += "  options:\n"
         for option in self.get_options():
             s += "    " + str(Option.from_dict(option)) + "\n"
+        s += "  instructions:\n"
+        for instruction in self.get_instructions():
+            s += "    " + str(Instruction.from_dict(instruction)) + "\n"
         return s
+
+class FtnMod(MongoIPCMessage):
+    def __init__(self, mod=None, id=None, table_id=None, matches=None, actions=None, options=None,
+                 instructions=None):
+        self.set_mod(mod)
+        self.set_id(id)
+        self.set_id(table_id)
+        self.set_matches(matches)
+        self.set_actions(actions)
+        self.set_options(options)
+        self.set_instructions(instructions)
+
+    def get_type(self):
+        return FTN_MOD
+
+    def get_mod(self):
+        return self.mod
+
+    def set_mod(self, mod):
+        mod = 0 if mod is None else mod
+        try:
+            self.mod = int(mod)
+        except:
+            self.mod = 0
+
+    def get_id(self):
+        return self.id
+
+    def set_id(self, id):
+        id = 0 if id is None else id
+        try:
+            self.id = int(id)
+        except:
+            self.id = 0
+            
+    def get_table_id(self):
+        return self.table_id
+
+    def set_table_id(self, table_id):
+        table_id = 0 if table_id is None else table_id
+        try:
+            self.table_id = int(table_id)
+        except:
+            self.table_id = 0
+
+    def get_matches(self):
+        return self.matches
+
+    def set_matches(self, matches):
+        matches = list() if matches is None else matches
+        try:
+            self.matches = list(matches)
+        except:
+            self.matches = list()
+
+    def add_match(self, match):
+        self.matches.append(match.to_dict())
+
+    def get_actions(self):
+        return self.actions
+
+    def set_actions(self, actions):
+        actions = list() if actions is None else actions
+        try:
+            self.actions = list(actions)
+        except:
+            self.actions = list()
+
+    def add_action(self, action):
+        self.actions.append(action.to_dict())
+
+    def get_options(self):
+        return self.options
+
+    def set_options(self, options):
+        options = list() if options is None else options
+        try:
+            self.options = list(options)
+        except:
+            self.options = list()
+
+    def add_option(self, option):
+        self.options.append(option.to_dict())
+        
+    def add_instruction(self, instruction):
+        self.instructions.append(instruction.to_dict())
+        
+    def get_instructions(self):
+        return self.instructions
+
+    def set_instructions(self, instructions):
+        instructions = list() if instructions is None else instructions
+        try:
+            self.instructions = list(instructions)
+        except:
+            self.instructions = list()
+
+    def from_dict(self, data):
+        self.set_mod(data["mod"])
+        self.set_id(data["id"])
+        self.set_table_id(data["table_id"])
+        self.set_matches(data["matches"])
+        self.set_actions(data["actions"])
+        self.set_options(data["options"])
+        self.set_options(data["instructions"])
+
+    def to_dict(self):
+        data = {}
+        data["mod"] = str(self.get_mod())
+        data["id"] = str(self.get_id())
+        data["table_id"] = str(self.get_table_id())
+        data["matches"] = self.get_matches()
+        data["actions"] = self.get_actions()
+        data["options"] = self.get_options()
+        data["instructions"] = self.get_instructions()
+        return data
+
+    def from_bson(self, data):
+        data = bson.BSON.decode(data)
+        self.from_dict(data)
+
+    def to_bson(self):
+        return bson.BSON.encode(self.get_dict())
+
+    def __str__(self):
+        s = "FtnMod\n"
+        s += "  mod: " + str(self.get_mod()) + "\n"
+        s += "  id: " + format_id(self.get_id()) + "\n"
+        s += "  table_id: " + format_id(self.get_table_id()) + "\n"
+        s += "  matches:\n"
+        for match in self.get_matches():
+            s += "    " + str(Match.from_dict(match)) + "\n"
+        s += "  actions:\n"
+        for action in self.get_actions():
+            s += "    " + str(Action.from_dict(action)) + "\n"
+        s += "  options:\n"
+        for option in self.get_options():
+            s += "    " + str(Option.from_dict(option)) + "\n"
+        s += "  instructions:\n"
+        for instruction in self.get_instructions():
+            s += "    " + str(Instruction.from_dict(instruction)) + "\n"
+        return s
+

@@ -95,6 +95,10 @@ echo_bold "-> Setting up MongoDB..."
 sed -i "/bind_ip/c\bind_ip = 127.0.0.1,$MONGODB_ADDR" $MONGODB_CONF
 service mongodb restart
 wait_port_listen $MONGODB_PORT
+sleep 5
+PYTHONPATH=. /usr/local/bin/ryu-manager ryu-rfproxy/rfproxy.py &
+wait_port_listen $CONTROLLER_PORT
+sleep 5
 
 echo_bold "-> Configuring the virtual machines..."
 # Create the rfclient dir
@@ -142,10 +146,11 @@ lxc-start -n rfvmC -d
 lxc-start -n rfvmD -d
 
 echo_bold "-> Starting the controller and RFPRoxy..."
-cd pox
-./pox.py log.level --=INFO topology openflow.topology openflow.discovery rfproxy rfstats &
-cd -
-wait_port_listen $CONTROLLER_PORT
+#cd pox
+#./pox.py log.level --=INFO topology openflow.topology openflow.discovery rfproxy rfstats &
+#cd -
+#PYTHONPATH=. /usr/local/bin/ryu-manager ryu-rfproxy/rfproxy.py &
+#wait_port_listen $CONTROLLER_PORT
 
 echo_bold "-> Starting RFServer..."
 ./rfserver/rfserver.py rftest/rftest2config.csv &
@@ -166,7 +171,8 @@ ovs-vsctl add-port dp0 rfvmD.1
 ovs-vsctl add-port dp0 rfvmD.2
 ovs-vsctl add-port dp0 rfvmD.3
 ovs-vsctl add-port dp0 rfvmD.4
-ovs-vsctl set Bridge dp0 other-config:datapath-id=7266767372667673
+#ovs-vsctl set Bridge dp0 other-config:datapath-id=7266767372667673 protocols=OpenFlow10,OpenFlow12,OpenFlow13
+ovs-vsctl set Bridge dp0 other-config:datapath-id=7266767372667673 protocols=OpenFlow12
 ovs-vsctl set-controller dp0 tcp:127.0.0.1:$CONTROLLER_PORT
 
 echo_bold "---"

@@ -36,3 +36,11 @@ RouteMod
     match[] matches
     action[] actions
     option[] options
+
+NhlfeMod
+    i8 mod
+    i64 id
+    match[] matches
+    action[] actions
+    option[] options
+    instruction[] instructions

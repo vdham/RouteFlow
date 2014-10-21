@@ -14,6 +14,7 @@ class FPMServer {
         static void print_nhlfe(const nhlfe_msg_t *msg);
         static fpm_msg_hdr_t* read_fpm_msg (char* buf, size_t buf_len);
         static void process_fpm_msg(fpm_msg_hdr_t* hdr);
+        static void print_ftn(const ftn_msg_t *msg);
 };
 
 #endif /* RFCLIENT_FPMSERVER_H_ */

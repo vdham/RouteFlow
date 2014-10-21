@@ -41,6 +41,10 @@ DC_LDP_PASSIVE = 9		# LDP protocol
 DC_LDP_ACTIVE = 10		# LDP protocol
 DC_ICMPV6 = 11			# ICMPv6 protocol
 DC_ALL = 255			# Send all traffic to the controller
+DC_LDP_MCAST = 14		# enable udp mcast for LDP packets
+
+DC_FW_T1 = 15
+DC_FW_T2 = 16
 
 RMT_ADD = 0			# Add flow to datapath
 RMT_DELETE = 1			# Remove flow from datapath
@@ -68,6 +72,7 @@ IPV4_MASK_EXACT = '255.255.255.255'
 IPV6_MASK_EXACT = 'FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF'
 TPORT_BGP = 0x00B3
 TPORT_LDP = 0x286
+ETHERTYPE_MPLS = 0x8847
 
 OFPP_CONTROLLER = 0xFFFFFFFD
 

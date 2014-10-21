@@ -36,6 +36,7 @@
 
 #include "FPMServer.hh"
 #include "FlowTable.h"
+#include <syslog.h>
 
 typedef struct glob_t_ {
     int server_sock;
@@ -46,12 +47,16 @@ glob_t glob_space;
 glob_t *glob = &glob_space;
 
 /* TODO: Integrate logging with RFClient */
-int log_level = 1;
+int log_level = 10;
 
-#define log(level, format...)     \
+/* #define log(level, format...)     \
 if (level <= log_level) {     \
     fprintf(stderr, format);      \
     fprintf(stderr, "\n");      \
+}*/
+#define log(level, format...)     \
+if (level <= log_level) {     \
+    syslog(LOG_INFO, format);      \
 }
 
 #define info_msg(format...) log(1, format)
@@ -146,7 +151,10 @@ FPMServer::read_fpm_msg(char *buf, size_t buf_len) {
             need_len = FPM_MSG_HDR_LEN - have_len;
         } else {
             need_len = fpm_msg_len(hdr) - have_len;
-            assert(need_len >= 0 && need_len < (end - cur));
+            //assert(need_len >= 0 && need_len < (end - cur));
+            if (!(need_len >= 0 && need_len < (end - cur))) {
+		exit (0);
+	    }
 
             if (!need_len) {
                 return hdr;
@@ -170,7 +178,10 @@ FPMServer::read_fpm_msg(char *buf, size_t buf_len) {
             continue;
         }
 
-        assert(bytes_read == need_len);
+        //assert(bytes_read == need_len);
+	if (bytes_read != need_len) {
+	   exit (0);
+	}
 
         if (reading_full_msg) {
             return hdr;
@@ -198,6 +209,19 @@ void FPMServer::print_nhlfe(const nhlfe_msg_t *msg) {
              ntohl(msg->in_label), ntohl(msg->out_label));
 }
 
+void FPMServer::print_ftn(const ftn_msg_t *msg) {
+    const char *op = (msg->table_operation == ADD_LSP)? "ADD_FTN" :
+                     (msg->table_operation == REMOVE_LSP)? "REMOVE_FTN" :
+                     "UNKNOWN";
+    //const char *type = (msg->ftn_operation == PUSH)? "PUSH" :
+      //                 "UNKNOWN";
+    const uint8_t *data = reinterpret_cast<const uint8_t*>(&msg->next_hop_ip);
+    IPAddress ip(msg->ip_version, data);
+
+    info_msg("fpm->%s %s %d", op, ip.toString().c_str(),
+             ntohl(msg->out_label));
+}
+
 /*
  * process_fpm_msg
  */
@@ -215,6 +239,7 @@ void FPMServer::process_fpm_msg(fpm_msg_hdr_t *hdr) {
         struct nlmsghdr *n = (nlmsghdr *) fpm_msg_data(hdr);
 
         if (n->nlmsg_type == RTM_NEWROUTE || n->nlmsg_type == RTM_DELROUTE) {
+	    info_msg("FlowTable::updateRouteTable called");
             FlowTable::updateRouteTable(n);
         }
     } else if (hdr->msg_type == FPM_MSG_TYPE_NHLFE) {
@@ -223,6 +248,10 @@ void FPMServer::process_fpm_msg(fpm_msg_hdr_t *hdr) {
         FlowTable::updateNHLFE(lsp_msg);
     } else if (hdr->msg_type == FPM_MSG_TYPE_FTN) {
         warn_msg("FTN not yet implemented");
+        ftn_msg_t *ftn_msg = (ftn_msg_t *) fpm_msg_data(hdr);
+        print_ftn(ftn_msg);
+        FlowTable::updateFTN(ftn_msg);
+
     } else {
         warn_msg("Unknown fpm message type %u", hdr->msg_type);
     }

@@ -10,6 +10,7 @@
 #include "Action.hh"
 #include "Match.hh"
 #include "Option.hh"
+#include "Instruction.hh"
 
 enum {
 	PORT_REGISTER,
@@ -18,8 +19,11 @@ enum {
 	DATAPATH_DOWN,
 	VIRTUAL_PLANE_MAP,
 	DATA_PLANE_MAP,
-	ROUTE_MOD
+	ROUTE_MOD,
+	NHLFE_MOD,
+	FTN_MOD
 };
+
 
 class PortRegister : public IPCMessage {
     public:
@@ -182,7 +186,8 @@ class DataPlaneMap : public IPCMessage {
 class RouteMod : public IPCMessage {
     public:
         RouteMod();
-        RouteMod(uint8_t mod, uint64_t id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options);
+        RouteMod(uint8_t mod, uint64_t id, uint8_t table_id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options,
+        		std::vector<Instruction> instructions);
 
         uint8_t get_mod();
         void set_mod(uint8_t mod);
@@ -202,6 +207,13 @@ class RouteMod : public IPCMessage {
         void set_options(std::vector<Option> options);
         void add_option(const Option& option);
 
+        std::vector<Instruction> get_instructions();
+        void set_instructions(std::vector<Instruction> instructions);
+        void add_instruction(const Instruction& instruction);
+
+        uint8_t get_table_id();
+        void set_table_id(uint8_t table_id);
+
         virtual int get_type();
         virtual void from_BSON(const char* data);
         virtual const char* to_BSON();
@@ -213,6 +225,100 @@ class RouteMod : public IPCMessage {
         std::vector<Match> matches;
         std::vector<Action> actions;
         std::vector<Option> options;
+        std::vector<Instruction> instructions;
+        uint8_t table_id;
+};
+
+class NhlfeMod : public IPCMessage {
+    public:
+        NhlfeMod();
+        NhlfeMod(uint8_t mod, uint64_t id, uint8_t table_id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options,
+        		std::vector<Instruction> instructions);
+
+        uint8_t get_mod();
+        void set_mod(uint8_t mod);
+
+        uint64_t get_id();
+        void set_id(uint64_t id);
+
+        std::vector<Match> get_matches();
+        void set_matches(std::vector<Match> matches);
+        void add_match(const Match& match);
+
+        std::vector<Action> get_actions();
+        void set_actions(std::vector<Action> actions);
+        void add_action(const Action& action);
+
+        std::vector<Option> get_options();
+        void set_options(std::vector<Option> options);
+        void add_option(const Option& option);
+
+        std::vector<Instruction> get_instructions();
+        void set_instructions(std::vector<Instruction> instructions);
+        void add_instruction(const Instruction& instruction);
+
+        uint8_t get_table_id();
+        void set_table_id(uint8_t table_id);
+
+        virtual int get_type();
+        virtual void from_BSON(const char* data);
+        virtual const char* to_BSON();
+        virtual string str();
+
+    private:
+        uint8_t mod;
+        uint64_t id;
+        std::vector<Match> matches;
+        std::vector<Action> actions;
+        std::vector<Option> options;
+        std::vector<Instruction> instructions;
+        uint8_t table_id;
+};
+
+class FtnMod : public IPCMessage {
+    public:
+        FtnMod();
+        FtnMod(uint8_t mod, uint64_t id, uint8_t table_id, std::vector<Match> matches, std::vector<Action> actions, std::vector<Option> options,
+        		std::vector<Instruction> instructions);
+
+        uint8_t get_mod();
+        void set_mod(uint8_t mod);
+
+        uint64_t get_id();
+        void set_id(uint64_t id);
+
+        std::vector<Match> get_matches();
+        void set_matches(std::vector<Match> matches);
+        void add_match(const Match& match);
+
+        std::vector<Action> get_actions();
+        void set_actions(std::vector<Action> actions);
+        void add_action(const Action& action);
+
+        std::vector<Option> get_options();
+        void set_options(std::vector<Option> options);
+        void add_option(const Option& option);
+
+        std::vector<Instruction> get_instructions();
+        void set_instructions(std::vector<Instruction> instructions);
+        void add_instruction(const Instruction& instruction);
+
+        uint8_t get_table_id();
+        void set_table_id(uint8_t table_id);
+
+        virtual int get_type();
+        virtual void from_BSON(const char* data);
+        virtual const char* to_BSON();
+        virtual string str();
+
+    private:
+        uint8_t mod;
+        uint64_t id;
+        std::vector<Match> matches;
+        std::vector<Action> actions;
+        std::vector<Option> options;
+        std::vector<Instruction> instructions;
+        uint8_t table_id;
 };
 
 #endif /* __RFPROTOCOL_H__ */

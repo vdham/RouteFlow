@@ -17,3 +17,7 @@ class RFProtocolFactory(IPC.IPCMessageFactory):
             return DataPlaneMap()
         if type_ == ROUTE_MOD:
             return RouteMod()
+        if type_ == NHLFE_MOD:
+            return NhlfeMod()
+        if type_ == FTN_MOD:
+            return FtnMod()

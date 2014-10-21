@@ -41,6 +41,7 @@ class FlowTable {
 
 #ifdef FPM_ENABLED
         static void updateNHLFE(nhlfe_msg_t *nhlfe_msg);
+        static void updateFTN(ftn_msg_t *ftn_msg);
 #else
         static void RTPollingCb();
         static int updateRouteTable(const struct sockaddr_nl*,
@@ -88,11 +89,19 @@ class FlowTable {
                                const MACAddress& gateway);
         static int setIP(RouteMod& rm, const IPAddress& addr,
                          const IPAddress& mask);
+        static int setIP(FtnMod& fm, const IPAddress& addr,
+                             const IPAddress& mask);
         static int sendToHw(RouteModType, const RouteEntry&);
         static int sendToHw(RouteModType, const HostEntry&);
         static int sendToHw(RouteModType, const IPAddress& addr,
                             const IPAddress& mask, const Interface&,
                             const MACAddress& gateway);
+        static int setEthernet(NhlfeMod& rm, const Interface& local_iface,
+                                   const MACAddress& gateway);
+        static int setEthernet(FtnMod& rm, const Interface& local_iface,
+                                           const MACAddress& gateway);
+	static int setPriority(NhlfeMod& rm);
+	static int setPriority(FtnMod& rm);
 };
 
 #endif /* FLOWTABLE_HH_ */

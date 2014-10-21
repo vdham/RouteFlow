@@ -13,6 +13,7 @@
 
 #include "converter.h"
 #include "FlowTable.h"
+#include <syslog.h>
 #ifdef FPM_ENABLED
   #include "FPMServer.hh"
 #endif /* FPM_ENABLED */
@@ -329,8 +330,11 @@ int FlowTable::updateRouteTable(struct nlmsghdr *n) {
 
     boost::this_thread::interruption_point();
 
-    if (!((n->nlmsg_type == RTM_NEWROUTE || n->nlmsg_type == RTM_DELROUTE) &&
-          rtmsg_ptr->rtm_table == RT_TABLE_MAIN)) {
+    //if (!((n->nlmsg_type == RTM_NEWROUTE || n->nlmsg_type == RTM_DELROUTE) &&
+     //     rtmsg_ptr->rtm_table == RT_TABLE_MAIN)) {
+    if (!((n->nlmsg_type == RTM_NEWROUTE || n->nlmsg_type == RTM_DELROUTE))){
+    	syslog (LOG_INFO, "updateRouteTable type is neither RTM_NEWROUTE nor RTM_DELROUTE");
+    	syslog (LOG_INFO, "updateRouteTable type is %d", n->nlmsg_type);
         return 0;
     }
 
@@ -348,12 +352,14 @@ int FlowTable::updateRouteTable(struct nlmsghdr *n) {
         case RTA_DST:
             if (rta_to_ip(rtmsg_ptr->rtm_family, RTA_DATA(rtattr_ptr),
                           rentry->address) < 0) {
+    		syslog (LOG_INFO, "updateRouteTable failed to find RTA_DST");
                 return 0;
             }
             break;
         case RTA_GATEWAY:
             if (rta_to_ip(rtmsg_ptr->rtm_family, RTA_DATA(rtattr_ptr),
                           rentry->gateway) < 0) {
+    		syslog (LOG_INFO, "updateRouteTable failed to find RTA_GATEWAY");
                 return 0;
             }
             break;
@@ -399,6 +405,7 @@ int FlowTable::updateRouteTable(struct nlmsghdr *n) {
     rentry->netmask = IPAddress(IPV4, rtmsg_ptr->rtm_dst_len);
 
     if (getInterface(intf, "route", rentry->interface) != 0) {
+    	syslog (LOG_INFO, "updateRouteTable failed to find getInterface");
         return 0;
     }
 
@@ -533,6 +540,53 @@ int FlowTable::setEthernet(RouteMod& rm, const Interface& local_iface,
     return 0;
 }
 
+int FlowTable::setEthernet(NhlfeMod& rm, const Interface& local_iface,
+                           const MACAddress& gateway) {
+    /* RFServer adds the Ethernet match to the flow, so we don't need to. */
+    // rm.add_match(Match(RFMT_ETHERNET, local_iface.hwaddress));
+
+    if (rm.get_mod() != RMT_DELETE) {
+    //    rm.add_action(Action(RFAT_SET_ETH_SRC, local_iface.hwaddress));
+     //   rm.add_action(Action(RFAT_SET_ETH_DST, gateway));
+    }
+    /*uint16_t priority = PRIORITY_LOW;
+    priority += (6 * PRIORITY_BAND);
+    rm.add_option(Option(RFOT_PRIORITY, priority));*/
+
+    return 0;
+}
+
+int FlowTable::setPriority(NhlfeMod& rm)
+{
+    uint16_t priority = PRIORITY_LOW;
+    priority += (100 * PRIORITY_BAND);
+    rm.add_option(Option(RFOT_PRIORITY, priority));
+    return 0;
+}
+int FlowTable::setPriority(FtnMod& rm)
+{
+    uint16_t priority = PRIORITY_LOW;
+    priority += (100 * PRIORITY_BAND);
+    rm.add_option(Option(RFOT_PRIORITY, priority));
+    return 0;
+}
+
+
+int FlowTable::setEthernet(FtnMod& rm, const Interface& local_iface,
+                           const MACAddress& gateway) {
+    /* RFServer adds the Ethernet match to the flow, so we don't need to. */
+    // rm.add_match(Match(RFMT_ETHERNET, local_iface.hwaddress));
+
+    if (rm.get_mod() != RMT_DELETE) {
+        //rm.add_action(Action(RFAT_SET_ETH_SRC, local_iface.hwaddress));
+        //rm.add_action(Action(RFAT_SET_ETH_DST, gateway));
+    }
+
+    return 0;
+}
+
+
+
 int FlowTable::setIP(RouteMod& rm, const IPAddress& addr,
                      const IPAddress& mask) {
      if (addr.getVersion() == IPV4) {
@@ -547,6 +601,24 @@ int FlowTable::setIP(RouteMod& rm, const IPAddress& addr,
     uint16_t priority = PRIORITY_LOW;
     priority += (mask.toPrefixLen() * PRIORITY_BAND);
     rm.add_option(Option(RFOT_PRIORITY, priority));
+
+    return 0;
+}
+
+int FlowTable::setIP(FtnMod& fm, const IPAddress& addr,
+                     const IPAddress& mask) {
+     if (addr.getVersion() == IPV4) {
+        fm.add_match(Match(RFMT_IPV4, addr, mask));
+    } else if (addr.getVersion() == IPV6) {
+        fm.add_match(Match(RFMT_IPV6, addr, mask));
+    } else {
+        fprintf(stderr, "Cannot send route with unsupported IP version\n");
+        return -1;
+    }
+
+  //  uint16_t priority = PRIORITY_LOW;
+ //   priority += (mask.toPrefixLen() * PRIORITY_BAND);
+  //  fm.add_option(Option(RFOT_PRIORITY, priority));
 
     return 0;
 }
@@ -621,7 +693,7 @@ int FlowTable::sendToHw(RouteModType mod, const IPAddress& addr,
  * TODO: If an error occurs here, the NHLFE is silently dropped. Fix this.
  */
 void FlowTable::updateNHLFE(nhlfe_msg_t *nhlfe_msg) {
-    RouteMod msg;
+    NhlfeMod msg;
 
     if (nhlfe_msg->table_operation == ADD_LSP) {
         msg.set_mod(RMT_ADD);
@@ -632,6 +704,9 @@ void FlowTable::updateNHLFE(nhlfe_msg_t *nhlfe_msg) {
         return;
     }
     msg.set_id(FlowTable::vm_id);
+    Interface iface;
+    if (nhlfe_msg->nhlfe_operation == SWAP)
+    {
 
     // We need the next-hop IP to determine which interface to use.
     int version = nhlfe_msg->ip_version;
@@ -639,7 +714,7 @@ void FlowTable::updateNHLFE(nhlfe_msg_t *nhlfe_msg) {
     IPAddress gwIP(version, ip_data);
 
     // Get our interface for packet egress.
-    Interface iface;
+    //Interface iface;
     map<string, HostEntry>::iterator iter;
     iter = FlowTable::hostTable.find(gwIP.toString());
     if (iter == FlowTable::hostTable.end()) {
@@ -664,23 +739,114 @@ void FlowTable::updateNHLFE(nhlfe_msg_t *nhlfe_msg) {
     if (setEthernet(msg, iface, gwMAC) != 0) {
         return;
     }
-
+    }
+    setPriority(msg);
     // Match on in_label only - matching on IP is the domain of FTN not NHLFE
-    msg.add_match(Match(RFMT_MPLS, nhlfe_msg->in_label));
+    msg.add_match(Match(RFMT_MPLS, ntohl(nhlfe_msg->in_label)));
+    fprintf(stdout, "flowtable vdham mpls_label is %d \n", ntohl(nhlfe_msg->in_label));
+    fprintf(stderr, "nhlfe mpls inlabel is %d", ntohl(nhlfe_msg->in_label));
 
     if (nhlfe_msg->nhlfe_operation == PUSH) {
-        msg.add_action(Action(RFAT_PUSH_MPLS, ntohl(nhlfe_msg->out_label)));
+        //msg.add_action(Action(RFAT_PUSH_MPLS, ntohl(nhlfe_msg->out_label)));
+       // msg.add_action(Action(RFAT_OUTPUT, iface.port));
     } else if (nhlfe_msg->nhlfe_operation == POP) {
         msg.add_action(Action(RFAT_POP_MPLS, (uint32_t)0));
+        msg.add_instruction (Instruction(RFIT_GOTO_TABLE, (uint16_t)2));
+        // add action to send to table_id 1
     } else if (nhlfe_msg->nhlfe_operation == SWAP) {
         msg.add_action(Action(RFAT_SWAP_MPLS, ntohl(nhlfe_msg->out_label)));
+        msg.add_action(Action(RFAT_OUTPUT, iface.port));
     } else {
         std::cerr << "Unknown lsp_operation" << std::endl;
         return;
     }
 
+    FlowTable::ipc->send(RFCLIENT_RFSERVER_CHANNEL, RFSERVER_ID, msg);
+
+    return;
+}
+
+void FlowTable::updateFTN(ftn_msg_t *ftn_msg) {
+    FtnMod msg;
+
+    boost::scoped_ptr<IPAddress> mask;
+    std::cerr << "Inside cerr updateFTN" << std::endl;
+    fprintf(stdout, "Inside fprint stdout FTN");
+    fprintf(stderr, "Inside fprint stderr FTN");
+
+
+
+    if (ftn_msg->table_operation == ADD_LSP) {
+        msg.set_mod(RMT_ADD);
+    } else if (ftn_msg->table_operation == REMOVE_LSP) {
+        msg.set_mod(RMT_DELETE);
+    } else {
+        std::cerr << "Unrecognised FTN table operation" << std::endl;
+        return;
+    }
+    msg.set_id(FlowTable::vm_id);
+    setPriority(msg);
+
+    // We need the next-hop IP to determine which interface to use.
+    int version = ftn_msg->ip_version;
+    //uint8_t* ip_data = reinterpret_cast<uint8_t*>(&ftn_msg->next_hop_ip);
+    uint8_t* ip_data = reinterpret_cast<uint8_t*>(&ftn_msg->match_network);
+    IPAddress dstIP(version, ip_data);
+
+
+    //mask.reset(new IPAddress(IPV4, FULL_IPV4_PREFIX));
+    mask.reset(new IPAddress(IPV4, ftn_msg->mask));
+
+
+    if (setIP(msg, dstIP, *mask.get()) != 0) {
+        std::cerr << "Error calling setIP in FlowTable::updateFTN" << std::endl;
+        fprintf(stderr, "Error calling setIP in FlowTable::updateFTN");
+        return;
+    }
+
+    // Get our interface for packet egress.
+    Interface iface;
+    uint8_t* ip_data_nh = reinterpret_cast<uint8_t*>(&ftn_msg->next_hop_ip);
+    IPAddress nhIP(version, ip_data_nh);
+    map<string, HostEntry>::iterator iter;
+    iter = FlowTable::hostTable.find(nhIP.toString());
+    if (iter == FlowTable::hostTable.end()) {
+    fprintf(stdout, "flowtable vdham updateFTN failure  \n" );
+        fprintf(stdout, "Failed to locate interface in  FlowTable::updateFTN");
+        return;
+    } else {
+        iface = iter->second.interface;
+    }
+
+    if (is_port_down(iface.port)) {
+	fprintf(stdout, "iface is down");
+        std::cerr << "Cannot send route via inactive interface for FTN" << std::endl;
+        return;
+    }
+
+    // Get the MAC address corresponding to our gateway.
+    const MACAddress& gwMAC = findHost(nhIP);
+    if (gwMAC == FlowTable::MAC_ADDR_NONE) {
+        fprintf(stdout, "Failed to locate interface for gw in  FlowTable::updateFTN");
+        return;
+    }
+
+    if (setEthernet(msg, iface, gwMAC) != 0) {
+        fprintf(stderr, "Failed to locate gwMAC in  FlowTable::updateFTN");
+        std::cerr << "Cannot send route via inactive interface for FTN" << std::endl;
+        return;
+    }
+
+    msg.add_action(Action(RFAT_PUSH_MPLS, ntohl(ftn_msg->out_label)));
+
     msg.add_action(Action(RFAT_OUTPUT, iface.port));
 
+   //setPriority(msg);
+    
+    fprintf(stdout, "Value of iface.port in FTN is %d", iface.port);
+//    fprintf(stdout, "Value of vm.id in FTN is %x", FlowTable::vm_id);
+    fprintf(stdout, "Value of FTN is ****************** %s \n", msg.str().c_str());
+//    std::cout << msg.str() << std::endl;
     FlowTable::ipc->send(RFCLIENT_RFSERVER_CHANNEL, RFSERVER_ID, msg);
 
     return;
