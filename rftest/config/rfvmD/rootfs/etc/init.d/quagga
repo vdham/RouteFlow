@@ -14,7 +14,7 @@
 #
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
-D_PATH=/usr/lib/quagga
+D_PATH=/usr/sbin
 C_PATH=/etc/quagga
 
 # Local Daemon selection may be done by using /etc/quagga/daemons.
