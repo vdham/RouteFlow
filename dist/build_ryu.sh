@@ -2,7 +2,7 @@
 
 #RYU_GIT="https://github.com/routeflow/ryu-rfproxy.git"
 RYU_GIT="https://github.com/vdham/ryu-rfproxy-kamboi.git"
-RYU_BRANCH="origin/ldpd_changes"
+RYU_BRANCH="origin/ldpd_pre_changes"
 
 RYU_DEPS="python-greenlet python-eventlet python-webob python-routes"
 RYU_VERSION="2.0"
@@ -23,6 +23,6 @@ get_ryu() {
 
     fetch "ryu-" "rfproxy" $RYU_GIT $RYU_BRANCH ||
         fail "Couldn't fetch ryu-rfproxy"
-    git checkout ldpd_changes
+    git checkout ldpd_pre_changes
     $DO cd -
 }
