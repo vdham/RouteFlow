@@ -23,7 +23,7 @@ git clone https://github.com/vdham/quagga-public-kamboi.git
 cd quagga-public-kamboi
 git checkout ldp_v1.0
 ./bootstrap.sh
-./configure --enable-mpls=null --sysconfdir=/etc/quagga --localstatedir=/var/run/quagga --prefix=/var/lib/lxc/base/rootfs/usr --enable-fpm --enable-vtysh
+./configure --enable-mpls=null --sysconfdir=/etc/quagga --localstatedir=/var/run/quagga --prefix=$LXCDIR/base/rootfs/usr --enable-fpm --enable-vtysh
 make
 make install
 
