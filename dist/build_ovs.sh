@@ -26,8 +26,8 @@ install_ovs() {
         fi
     fi
 
-    $SUPER mkdir -p /usr/local/etc/openvswitch
-    $SUPER rm -f /usr/local/etc/openvswitch/conf.db
+    $SUPER mkdir -p /var/run/openvswitch
+    $SUPER rm -f /var/run/openvswitch/conf.db
     $SUPER ovsdb-tool create /usr/local/etc/openvswitch/conf.db \
         vswitchd/vswitch.ovsschema || return 1
 
@@ -53,7 +53,7 @@ build_ovs() {
             ./boot.sh || fail "Couldn't bootstrap Open vSwitch"
         fi
         if [ ! -e "Makefile" ]; then
-            $DO ./configure --with-linux=/lib/modules/`uname -r`/build ||
+            $DO ./configure --prefix=/usr --localstatedir=/var --with-linux=/lib/modules/`uname -r`/build ||
                 fail "Couldn't configure Open vSwitch"
         fi
         $DO make || fail "Couldn't build Open vSwitch"
