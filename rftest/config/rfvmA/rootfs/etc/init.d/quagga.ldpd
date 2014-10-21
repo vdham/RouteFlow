@@ -19,7 +19,7 @@ C_PATH=/etc/quagga
 
 # Local Daemon selection may be done by using /etc/quagga/daemons.
 # See /usr/share/doc/quagga/README.Debian.gz for further information.
-DAEMONS="zebra bgpd ripd ripngd ospfd ospf6d isisd" # keep zebra first!
+DAEMONS="zebra bgpd ripd ripngd ospfd ospf6d isisd ldpd" # keep zebra first!
 
 # Print the name of the pidfile.
 pidfile()

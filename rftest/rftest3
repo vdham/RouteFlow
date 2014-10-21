@@ -139,11 +139,11 @@ chmod +x /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
 chmod +x /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
 chmod +x /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
 
-#Copy the quagga default config file
-cp rftest/config/rfvmA/rootfs/etc/init.d/quagga /var/lib/lxc/rfvmA/rootfs/etc/init.d/quagga
-cp rftest/config/rfvmB/rootfs/etc/init.d/quagga /var/lib/lxc/rfvmB/rootfs/etc/init.d/quagga
-cp rftest/config/rfvmC/rootfs/etc/init.d/quagga /var/lib/lxc/rfvmC/rootfs/etc/init.d/quagga
-cp rftest/config/rfvmD/rootfs/etc/init.d/quagga /var/lib/lxc/rfvmD/rootfs/etc/init.d/quagga
+#Copy the quagga config file which has ldpd enabled
+cp rftest/config/rfvmA/rootfs/etc/init.d/quagga.ldpd /var/lib/lxc/rfvmA/rootfs/etc/init.d/quagga
+cp rftest/config/rfvmB/rootfs/etc/init.d/quagga.ldpd /var/lib/lxc/rfvmB/rootfs/etc/init.d/quagga
+cp rftest/config/rfvmC/rootfs/etc/init.d/quagga.ldpd /var/lib/lxc/rfvmC/rootfs/etc/init.d/quagga
+cp rftest/config/rfvmD/rootfs/etc/init.d/quagga.ldpd /var/lib/lxc/rfvmD/rootfs/etc/init.d/quagga
 
 echo_bold "-> Starting the virtual machines..."
 lxc-start -n rfvmA -d

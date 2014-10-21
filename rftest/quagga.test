@@ -1,0 +1,8 @@
+cp config/rfvmA/rootfs/etc/init.d/quagga.default /var/lib/lxc/rfvmA/rootfs/etc/init.d/quagga
+cp config/rfvmB/rootfs/etc/init.d/quagga.default /var/lib/lxc/rfvmB/rootfs/etc/init.d/quagga
+cp config/rfvmC/rootfs/etc/init.d/quagga.default /var/lib/lxc/rfvmC/rootfs/etc/init.d/quagga
+cp config/rfvmD/rootfs/etc/init.d/quagga.default /var/lib/lxc/rfvmD/rootfs/etc/init.d/quagga
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
