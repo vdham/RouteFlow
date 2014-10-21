@@ -142,7 +142,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
 
                 # Replace the VM id,port with the Datapath id.port
                 rm.set_id(int(entry.dp_id))
-                #rm.set_table_id(2)
+                ##rm.set_table_id(2)
 
                 if rm.get_mod() is RMT_DELETE:
                     # When deleting a route, we don't need an output action.
@@ -349,7 +349,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
 
     def send_datapath_config_T0_message(self, ct_id, dp_id, table_id, operation_id):
         rm = RouteMod(RMT_ADD, dp_id)
-	rm.set_table_id (0);
+	rm.set_table_id (TABLE_T0);
 
         if operation_id == DC_CLEAR_FLOW_TABLE:
             rm.set_mod(RMT_DELETE)
@@ -367,7 +367,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
 
     def send_datapath_config_T1_message(self, ct_id, dp_id, table_id, operation_id):
         rm = RouteMod(RMT_ADD, dp_id)
-	rm.set_table_id (1);
+	rm.set_table_id (TABLE_T1);
 
         if operation_id == DC_CLEAR_FLOW_TABLE:
             rm.set_mod(RMT_DELETE)
@@ -473,7 +473,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
     def register_nhlfe_mod(self, rm):
         
         vm_id = rm.get_id()
-        rm.set_table_id(1)
+        #rm.set_table_id(1)
 
         # Find the output action
         for i, action in enumerate(rm.actions):

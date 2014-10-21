@@ -171,7 +171,7 @@ On xterm of h2
 On xterm of h3
 
 ```
-> iperf -c 172.31.2.100 12345 -M 100
+> iperf -c 172.31.2.100 12345 -M 536
 ```
 
 USe ovs-ofctl to see packet counters increment for mpls flow entries.
