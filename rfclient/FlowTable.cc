@@ -547,8 +547,8 @@ int FlowTable::setEthernet(NhlfeMod& rm, const Interface& local_iface,
     // rm.add_match(Match(RFMT_ETHERNET, local_iface.hwaddress));
 
     if (rm.get_mod() != RMT_DELETE) {
-    //    rm.add_action(Action(RFAT_SET_ETH_SRC, local_iface.hwaddress));
-     //   rm.add_action(Action(RFAT_SET_ETH_DST, gateway));
+        rm.add_action(Action(RFAT_SET_ETH_SRC, local_iface.hwaddress));
+        rm.add_action(Action(RFAT_SET_ETH_DST, gateway));
     }
     /*uint16_t priority = PRIORITY_LOW;
     priority += (6 * PRIORITY_BAND);
@@ -579,8 +579,8 @@ int FlowTable::setEthernet(FtnMod& rm, const Interface& local_iface,
     // rm.add_match(Match(RFMT_ETHERNET, local_iface.hwaddress));
 
     if (rm.get_mod() != RMT_DELETE) {
-        //rm.add_action(Action(RFAT_SET_ETH_SRC, local_iface.hwaddress));
-        //rm.add_action(Action(RFAT_SET_ETH_DST, gateway));
+        rm.add_action(Action(RFAT_SET_ETH_SRC, local_iface.hwaddress));
+        rm.add_action(Action(RFAT_SET_ETH_DST, gateway));
     }
 
     return 0;

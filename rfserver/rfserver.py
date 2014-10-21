@@ -619,12 +619,12 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
             if out_port != entry.dp_port:
                 if entry.get_status() == RFENTRY_ACTIVE or \
                    entry.get_status() == RFISL_ACTIVE:
-                    #rm.add_match(Match.ETHERNET(entry.eth_addr))
+                    rm.add_match(Match.ETHERNET(entry.eth_addr))
                     rm.add_match(Match.IN_PORT(entry.dp_port))
                     self.ipc.send(RFSERVER_RFPROXY_CHANNEL,
                                   str(entry.ct_id), rm)
-                    #rm.set_matches(rm.get_matches()[:-2])
-                    rm.set_matches(rm.get_matches()[:])
+                    rm.set_matches(rm.get_matches()[:-2])
+                    #rm.set_matches(rm.get_matches()[:])
 
     def _send_nhlfe_pop_matches(self, rm, ct_id):
         
@@ -637,12 +637,12 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
             if out_port != entry.dp_port:
                 if entry.get_status() == RFENTRY_ACTIVE or \
                    entry.get_status() == RFISL_ACTIVE:
-                    #rm.add_match(Match.ETHERNET(entry.eth_addr))
+                    rm.add_match(Match.ETHERNET(entry.eth_addr))
                     rm.add_match(Match.IN_PORT(entry.dp_port))
                     self.ipc.send(RFSERVER_RFPROXY_CHANNEL,
                                   str(entry.ct_id), rm)
-                    #rm.set_matches(rm.get_matches()[:-2])
-                    rm.set_matches(rm.get_matches()[:])
+                    rm.set_matches(rm.get_matches()[:-2])
+                    #rm.set_matches(rm.get_matches()[:])
 
 if __name__ == "__main__":
     description='RFServer co-ordinates RFClient and RFProxy instances, ' \
