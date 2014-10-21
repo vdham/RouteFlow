@@ -45,4 +45,8 @@ typedef enum route_mod_type {
 #define PRIORITY_HIGH 0x8020
 #define PRIORITY_HIGHEST 0xC030
 
+#define TABLE_T0  0
+#define TABLE_T1  1
+#define TABLE_T2  2
+
 #endif /* __DEFS_H__ */

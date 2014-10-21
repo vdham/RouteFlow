@@ -13,6 +13,7 @@
 
 #include "converter.h"
 #include "FlowTable.h"
+#include "defs.h"
 #include <syslog.h>
 #ifdef FPM_ENABLED
   #include "FPMServer.hh"
@@ -704,6 +705,7 @@ void FlowTable::updateNHLFE(nhlfe_msg_t *nhlfe_msg) {
         return;
     }
     msg.set_id(FlowTable::vm_id);
+    msg.set_table_id(TABLE_T1);
     Interface iface;
     if (nhlfe_msg->nhlfe_operation == SWAP)
     {
@@ -743,16 +745,12 @@ void FlowTable::updateNHLFE(nhlfe_msg_t *nhlfe_msg) {
     setPriority(msg);
     // Match on in_label only - matching on IP is the domain of FTN not NHLFE
     msg.add_match(Match(RFMT_MPLS, ntohl(nhlfe_msg->in_label)));
-    fprintf(stdout, "flowtable vdham mpls_label is %d \n", ntohl(nhlfe_msg->in_label));
-    fprintf(stderr, "nhlfe mpls inlabel is %d", ntohl(nhlfe_msg->in_label));
 
     if (nhlfe_msg->nhlfe_operation == PUSH) {
-        //msg.add_action(Action(RFAT_PUSH_MPLS, ntohl(nhlfe_msg->out_label)));
-       // msg.add_action(Action(RFAT_OUTPUT, iface.port));
+        std::cerr << "Unsupported PUSH action for NHLFE" << std::endl;
     } else if (nhlfe_msg->nhlfe_operation == POP) {
         msg.add_action(Action(RFAT_POP_MPLS, (uint32_t)0));
-        msg.add_instruction (Instruction(RFIT_GOTO_TABLE, (uint16_t)2));
-        // add action to send to table_id 1
+        msg.add_instruction (Instruction(RFIT_GOTO_TABLE, (uint16_t)TABLE_T2));
     } else if (nhlfe_msg->nhlfe_operation == SWAP) {
         msg.add_action(Action(RFAT_SWAP_MPLS, ntohl(nhlfe_msg->out_label)));
         msg.add_action(Action(RFAT_OUTPUT, iface.port));
@@ -771,10 +769,6 @@ void FlowTable::updateFTN(ftn_msg_t *ftn_msg) {
 
     boost::scoped_ptr<IPAddress> mask;
     std::cerr << "Inside cerr updateFTN" << std::endl;
-    fprintf(stdout, "Inside fprint stdout FTN");
-    fprintf(stderr, "Inside fprint stderr FTN");
-
-
 
     if (ftn_msg->table_operation == ADD_LSP) {
         msg.set_mod(RMT_ADD);
@@ -785,22 +779,20 @@ void FlowTable::updateFTN(ftn_msg_t *ftn_msg) {
         return;
     }
     msg.set_id(FlowTable::vm_id);
+    msg.set_table_id(TABLE_T2);
     setPriority(msg);
 
     // We need the next-hop IP to determine which interface to use.
     int version = ftn_msg->ip_version;
-    //uint8_t* ip_data = reinterpret_cast<uint8_t*>(&ftn_msg->next_hop_ip);
+
     uint8_t* ip_data = reinterpret_cast<uint8_t*>(&ftn_msg->match_network);
     IPAddress dstIP(version, ip_data);
 
-
-    //mask.reset(new IPAddress(IPV4, FULL_IPV4_PREFIX));
     mask.reset(new IPAddress(IPV4, ftn_msg->mask));
 
 
     if (setIP(msg, dstIP, *mask.get()) != 0) {
         std::cerr << "Error calling setIP in FlowTable::updateFTN" << std::endl;
-        fprintf(stderr, "Error calling setIP in FlowTable::updateFTN");
         return;
     }
 
@@ -811,15 +803,13 @@ void FlowTable::updateFTN(ftn_msg_t *ftn_msg) {
     map<string, HostEntry>::iterator iter;
     iter = FlowTable::hostTable.find(nhIP.toString());
     if (iter == FlowTable::hostTable.end()) {
-    fprintf(stdout, "flowtable vdham updateFTN failure  \n" );
-        fprintf(stdout, "Failed to locate interface in  FlowTable::updateFTN");
+    	std::cerr << "updateFTN failure" << std::endl;
         return;
     } else {
         iface = iter->second.interface;
     }
 
     if (is_port_down(iface.port)) {
-	fprintf(stdout, "iface is down");
         std::cerr << "Cannot send route via inactive interface for FTN" << std::endl;
         return;
     }
@@ -827,12 +817,11 @@ void FlowTable::updateFTN(ftn_msg_t *ftn_msg) {
     // Get the MAC address corresponding to our gateway.
     const MACAddress& gwMAC = findHost(nhIP);
     if (gwMAC == FlowTable::MAC_ADDR_NONE) {
-        fprintf(stdout, "Failed to locate interface for gw in  FlowTable::updateFTN");
+        std::cerr << "Failed to locate interface for gw in  FlowTable::updateFTN" << std::endl;
         return;
     }
 
     if (setEthernet(msg, iface, gwMAC) != 0) {
-        fprintf(stderr, "Failed to locate gwMAC in  FlowTable::updateFTN");
         std::cerr << "Cannot send route via inactive interface for FTN" << std::endl;
         return;
     }
@@ -842,11 +831,7 @@ void FlowTable::updateFTN(ftn_msg_t *ftn_msg) {
     msg.add_action(Action(RFAT_OUTPUT, iface.port));
 
    //setPriority(msg);
-    
-    fprintf(stdout, "Value of iface.port in FTN is %d", iface.port);
-//    fprintf(stdout, "Value of vm.id in FTN is %x", FlowTable::vm_id);
-    fprintf(stdout, "Value of FTN is ****************** %s \n", msg.str().c_str());
-//    std::cout << msg.str() << std::endl;
+
     FlowTable::ipc->send(RFCLIENT_RFSERVER_CHANNEL, RFSERVER_ID, msg);
 
     return;

@@ -213,8 +213,7 @@ void FPMServer::print_ftn(const ftn_msg_t *msg) {
     const char *op = (msg->table_operation == ADD_LSP)? "ADD_FTN" :
                      (msg->table_operation == REMOVE_LSP)? "REMOVE_FTN" :
                      "UNKNOWN";
-    //const char *type = (msg->ftn_operation == PUSH)? "PUSH" :
-      //                 "UNKNOWN";
+
     const uint8_t *data = reinterpret_cast<const uint8_t*>(&msg->next_hop_ip);
     IPAddress ip(msg->ip_version, data);
 
@@ -244,12 +243,9 @@ void FPMServer::process_fpm_msg(fpm_msg_hdr_t *hdr) {
         }
     } else if (hdr->msg_type == FPM_MSG_TYPE_NHLFE) {
         nhlfe_msg_t *lsp_msg = (nhlfe_msg_t *) fpm_msg_data(hdr);
-        print_nhlfe(lsp_msg);
         FlowTable::updateNHLFE(lsp_msg);
     } else if (hdr->msg_type == FPM_MSG_TYPE_FTN) {
-        warn_msg("FTN not yet implemented");
         ftn_msg_t *ftn_msg = (ftn_msg_t *) fpm_msg_data(hdr);
-        print_ftn(ftn_msg);
         FlowTable::updateFTN(ftn_msg);
 
     } else {
