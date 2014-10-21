@@ -339,8 +339,8 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
             elif operation_id == DC_LDP_MCAST:
                 rm.add_match(Match.ETHERTYPE(ETHERTYPE_IP))
                 rm.add_match(Match.NW_PROTO(IPPROTO_UDP))
-                # rm.add_match(Match.TP_SRC(TPORT_LDP))
-                # rm.add_match(Match.TP_DST(TPORT_LDP))
+                rm.add_match(Match.UDP_SRC(TPORT_LDP))
+                rm.add_match(Match.UDP_DST(TPORT_LDP))
             elif operation_id == DC_VM_INFO:
                 rm.add_match(Match.ETHERTYPE(RF_ETH_PROTO))
             rm.add_action(Action.CONTROLLER())

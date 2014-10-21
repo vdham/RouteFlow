@@ -46,6 +46,8 @@ std::string Match::type_to_string() const {
         case RFMT_NW_PROTO:     return "RFMT_NW_PROTO";
         case RFMT_TP_SRC:       return "RFMT_TP_SRC";
         case RFMT_TP_DST:       return "RFMT_TP_DST";
+        case RFMT_UDP_SRC:       return "RFMT_UDP_SRC";
+        case RFMT_UDP_DST:       return "RFMT_UDP_DST";
         case RFMT_IN_PORT:      return "RFMT_IN_PORT";
         case RFMT_VLAN:         return "RFMT_VLAN";
         default:                return "UNKNOWN_MATCH";
@@ -65,6 +67,8 @@ size_t Match::type_to_length(uint8_t type) {
         case RFMT_ETHERTYPE:
         case RFMT_TP_SRC:
         case RFMT_TP_DST:
+        case RFMT_UDP_SRC:
+        case RFMT_UDP_DST:
         case RFMT_VLAN:
             return sizeof(uint16_t);
         case RFMT_MPLS:
