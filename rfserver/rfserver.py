@@ -294,8 +294,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
     def send_datapath_config_message(self, ct_id, dp_id, table_id, operation_id):
         rm = RouteMod(RMT_ADD, dp_id)
 	rm.set_table_id (table_id);
-	#vdham rm.set_table_id (0);
-
+	
         if operation_id == DC_CLEAR_FLOW_TABLE:
             rm.set_mod(RMT_DELETE)
             rm.add_option(Option.PRIORITY(PRIORITY_LOWEST))
@@ -384,34 +383,34 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
     def config_dp(self, ct_id, dp_id):
         if is_rfvs(dp_id):
             # TODO: support more than one OVS
-            self.send_datapath_config_message(ct_id, dp_id, 0, DC_ALL)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T0, DC_ALL)
             self.log.info("Configuring RFVS (dp_id=%s)" % format_id(dp_id))
         elif self.rftable.is_dp_registered(ct_id, dp_id) or \
              self.isltable.is_dp_registered(ct_id, dp_id):
             # Configure a normal switch. Clear the tables and install default
             # flows.
-            self.send_datapath_config_T0_message(ct_id, dp_id, 0, \
+            self.send_datapath_config_T0_message(ct_id, dp_id, TABLE_T0, \
                                               DC_CLEAR_FLOW_TABLE)
-            self.send_datapath_config_T0_message(ct_id, dp_id, 0, DC_FW_T1)
-            self.send_datapath_config_T0_message(ct_id, dp_id, 0, DC_FW_T2)	
-            self.send_datapath_config_T1_message(ct_id, dp_id, 1, DC_CLEAR_FLOW_TABLE)	
-            self.send_datapath_config_T1_message(ct_id, dp_id, 1, DC_DROP_ALL)	
-            self.send_datapath_config_message(ct_id, dp_id, 2, \
+            self.send_datapath_config_T0_message(ct_id, dp_id, TABLE_T0, DC_FW_T1)
+            self.send_datapath_config_T0_message(ct_id, dp_id, TABLE_T0, DC_FW_T2)	
+            self.send_datapath_config_T1_message(ct_id, dp_id, TABLE_T1, DC_CLEAR_FLOW_TABLE)	
+            self.send_datapath_config_T1_message(ct_id, dp_id, TABLE_T1, DC_DROP_ALL)	
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, \
                                               DC_CLEAR_FLOW_TABLE)
             # TODO: enforce order: clear should always be executed first
-            self.send_datapath_config_message(ct_id, dp_id, 2, \
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, \
                                               DC_CLEAR_FLOW_TABLE)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_DROP_ALL)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_OSPF)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_BGP_PASSIVE)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_BGP_ACTIVE)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_RIPV2)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_ARP)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_ICMP)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_ICMPV6)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_LDP_PASSIVE)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_LDP_ACTIVE)
-            self.send_datapath_config_message(ct_id, dp_id, 2, DC_LDP_MCAST)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_DROP_ALL)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_OSPF)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_BGP_PASSIVE)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_BGP_ACTIVE)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_RIPV2)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_ARP)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_ICMP)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_ICMPV6)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_LDP_PASSIVE)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_LDP_ACTIVE)
+            self.send_datapath_config_message(ct_id, dp_id, TABLE_T2, DC_LDP_MCAST)
             self.log.info("Configuring datapath (dp_id=%s)" % format_id(dp_id))
         return is_rfvs(dp_id)
 
@@ -472,7 +471,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
     # Takes a NhlfeMod, replaces its VM id,port with the associated DP id,port
     # and sends to the corresponding controller
     def register_nhlfe_mod(self, rm):
-        #vdham print("***************nhlfe message is ***************\n %s \n", rm.__str__())
+        
         vm_id = rm.get_id()
         rm.set_table_id(1)
 
@@ -489,7 +488,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
                 # If we can't find an associated datapath for this RouteMod,
                 # drop it.
                 if entry is None or entry.get_status() == RFENTRY_IDLE_VM_PORT:
-                    self.log.info("Received RouteMod destined for unknown "
+                    self.log.info("Received NhlfeMod destined for unknown "
                                   "datapath - Dropping (vm_id=%s)" %
                                   (format_id(vm_id)))
                     return
@@ -530,12 +529,11 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
 
                 return
             if action['type'] is RFAT_POP_MPLS:
-		print("*************Received POP_MPLS***************\n")
 		entry = self.rftable.get_entry_by_vm_port(vm_id, 1)
                 # If we can't find an associated datapath for this RouteMod,
                 # drop it.
                 if entry is None or entry.get_status() == RFENTRY_IDLE_VM_PORT:
-                    self.log.info("Received RouteMod destined for unknown "
+                    self.log.info("Received NhlfeMod destined for unknown "
                                   "datapath - Dropping (vm_id=%s)" %
                                   (format_id(vm_id)))
                     return
@@ -557,17 +555,14 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
     # and sends to the corresponding controller
     def register_ftn_mod(self, rm):
         vm_id = rm.get_id()
-        #rm.set_table_id(2)
-        print("***************FTN message is ***************\n %s \n", rm.__str__())
-
+                
         # Find the output action
         for i, action in enumerate(rm.actions):
             if action['type'] is RFAT_OUTPUT:
                 # Put the action in an action object for easy modification
                 action_output = Action.from_dict(action)
                 vm_port = action_output.get_value()
-                print("***************FTN vm port value is %d**********************", vm_port)
-
+                
                 # Find the (vmid, vm_port), (dpid, dpport) pair
                 entry = self.rftable.get_entry_by_vm_port(vm_id, vm_port)
 
@@ -594,9 +589,6 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
                                                    ct_id=entry.ct_id)
                 entries.extend(self.isltable.get_entries(dp_id=entry.dp_id,
                                                          ct_id=entry.ct_id))
-                #vdhamrm.add_option(Option.CT_ID(entry.ct_id))
-                #rm.add_option(Option.PRIORITY(20000))
-                #rm.add_option(Option.PRIORITY(PRIORITY_HIGH))
 
                 self._send_ftn_with_matches(rm, entry.dp_port, entries)
 
@@ -635,7 +627,7 @@ class RFServer(RFProtocolFactory, IPC.IPCMessageProcessor):
                     rm.set_matches(rm.get_matches()[:])
 
     def _send_nhlfe_pop_matches(self, rm, ct_id):
-        #send entries matching external ports
+        
         self.ipc.send(RFSERVER_RFPROXY_CHANNEL,
                 str(ct_id), rm)
 

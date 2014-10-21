@@ -46,6 +46,10 @@ DC_LDP_MCAST = 14		# enable udp mcast for LDP packets
 DC_FW_T1 = 15
 DC_FW_T2 = 16
 
+TABLE_T0 = 0
+TABLE_T1 = 1
+TABLE_T2 = 2
+
 RMT_ADD = 0			# Add flow to datapath
 RMT_DELETE = 1			# Remove flow from datapath
 #RMT_MODIFY = 2		# Modify existing flow (Unimplemented)
