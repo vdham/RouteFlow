@@ -28,7 +28,7 @@ install_ovs() {
 
     $SUPER mkdir -p /var/run/openvswitch
     $SUPER rm -f /var/run/openvswitch/conf.db
-    $SUPER ovsdb-tool create /usr/local/etc/openvswitch/conf.db \
+    $SUPER ovsdb-tool create /var/run/openvswitch/conf.db \
         vswitchd/vswitch.ovsschema || return 1
 
     return 0
