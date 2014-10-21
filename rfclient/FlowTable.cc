@@ -670,6 +670,7 @@ int FlowTable::sendToHw(RouteModType mod, const IPAddress& addr,
 
     rm.set_mod(mod);
     rm.set_id(FlowTable::vm_id);
+    rm.set_table_id (TABLE_T2);
 
     if (setEthernet(rm, local_iface, gateway) != 0) {
         return -1;
