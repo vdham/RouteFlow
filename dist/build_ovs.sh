@@ -1,7 +1,7 @@
 #!/bin/sh
 
 OVS_URL="http://openvswitch.org/releases"
-OVS_GIT="git://openvswitch.org/openvswitch"
+OVS_GIT="https://github.com/openvswitch/ovs"
 OVS_BRANCH="origin/master"
 
 OVS_BINARY="openvswitch-switch openvswitch-datapath-source \
