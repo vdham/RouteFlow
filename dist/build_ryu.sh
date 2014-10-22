@@ -1,7 +1,6 @@
 #!/bin/sh
 
-#RYU_GIT="https://github.com/routeflow/ryu-rfproxy.git"
-RYU_GIT="https://github.com/vdham/ryu-rfproxy-kamboi.git"
+RYU_GIT="https://github.com/vdham/ryu-rfproxy.git"
 RYU_BRANCH="origin/ldp_v1.1"
 
 RYU_DEPS="python-greenlet python-eventlet python-webob python-routes"
