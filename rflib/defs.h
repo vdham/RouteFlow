@@ -61,6 +61,8 @@ typedef enum port_config_type {
 #define TPORT_BGP 0x00B3
 #define OFPP_CONTROLLER 0xFFFFFFFD
 
+#define IPPROTO_OSPF 0x59
+
 #define CONTROLLER_GROUP 1
 
 #endif /* __DEFS_H__ */
