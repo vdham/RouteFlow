@@ -116,23 +116,27 @@ cp build/rfclient /var/lib/lxc/rfvmD/rootfs/opt/rfclient/rfclient
 # We sleep for a few seconds to wait for the interfaces to go up
 echo "#!/bin/sh" > /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
 echo "sleep 3" >> /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
-echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
 echo "/opt/rfclient/rfclient > /var/log/rfclient.log" >> /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
+echo "sleep 9" >> /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
 
 echo "#!/bin/sh" > /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
 echo "sleep 3" >> /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
-echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
 echo "/opt/rfclient/rfclient > /var/log/rfclient.log" >> /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
+echo "sleep 9" >> /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
 
 echo "#!/bin/sh" > /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
 echo "sleep 3" >> /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
-echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
 echo "/opt/rfclient/rfclient > /var/log/rfclient.log" >> /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
+echo "sleep 9" >> /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmC/rootfs/root/run_rfclient.sh
 
 echo "#!/bin/sh" > /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
 echo "sleep 3" >> /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
-echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
 echo "/opt/rfclient/rfclient > /var/log/rfclient.log" >> /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
+echo "sleep 9" >> /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
+echo "/etc/init.d/quagga start" >> /var/lib/lxc/rfvmD/rootfs/root/run_rfclient.sh
 
 chmod +x /var/lib/lxc/rfvmA/rootfs/root/run_rfclient.sh
 chmod +x /var/lib/lxc/rfvmB/rootfs/root/run_rfclient.sh
